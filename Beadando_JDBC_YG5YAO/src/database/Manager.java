@@ -20,7 +20,7 @@ public class Manager {
 	
 	private static final String insertGameSQL="insert into game values(?,?,?)";
 	private static final String selectMaxGameIdSQL="select max(id) from game";
-	private static final String getCarsByGameSQL="select * from car where game = ?";
+	private static final String getGamesByDeveloperSQL="select * from game where developer = ?";
 	private static final String getGameByNameSQL="select * from game where name = ?";
 	private static final String DELETE_GAME_SQL="delete from game where id = ?";
 	private static final String SELECT_ALL_TABLES="Select * from game p left outer join car c on (p.id=c.game)";
@@ -49,7 +49,7 @@ public class Manager {
 		game.setId(getMaxGameId()+1);
 		prstmt.setInt(1, game.getId());
 		prstmt.setString(2, game.getName());
-		prstmt.setDate(3, game.getBirth());
+		prstmt.setDate(3, game.getRelease());
 		
 		if(prstmt.execute()) new Exception("Not successful");
 	}
@@ -64,17 +64,17 @@ public class Manager {
 		return returnValue;
 	}
 	
-	public ArrayList<Car> getCarsByGame(Game game) throws SQLException{
-		ArrayList<Car> result = new ArrayList<Car>();
+	public ArrayList<Game> getGamesByDeveloper(Developer developer) throws SQLException{
+		ArrayList<Game> result = new ArrayList<Game>();
 		try {
-		PreparedStatement prstmt = this.conn.prepareStatement(getCarsByGameSQL);
+		PreparedStatement prstmt = this.conn.prepareStatement(getGamesByDeveloperSQL);
 		
-		prstmt.setInt(1, game.getId());
+		prstmt.setInt(1, developer.getId());
 		
 		ResultSet rs = prstmt.executeQuery();
 		
 		while(rs.next()) {
-			result.add(new Car(rs.getString(1),rs.getDate(2),rs.getString(3),rs.getInt(4),game));
+			result.add(new Game(rs.getInt(1),rs.getString(2),rs.getDate(3),developer));
 		}
 		}catch (SQLException e) {
 			return null;
@@ -88,7 +88,7 @@ public class Manager {
 		prstmt.setString(1, name);
 		ResultSet rs = prstmt.executeQuery();
 		rs.next();
-		return new Game(rs.getInt(1),rs.getString(2),rs.getDate(3));
+		return new Game(rs.getInt(1),rs.getString(2),rs.getDate(3),rs.getDeveloper(4));
 		
 		}catch(SQLException e) {	}
 		

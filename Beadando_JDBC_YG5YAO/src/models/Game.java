@@ -5,16 +5,25 @@ import java.sql.Date;
 public class Game {
 	private int id;
 	private String name;
-	private Date birth;
+	private Date release;
+	private Developer developer;
 	
 	
-	public Game(int id, String name, Date birth) {
+	public Game(int id, String name, Date release, Developer developer) {
 		super();
 		this.id = id;
 		this.name = name;
-		this.birth = birth;
+		this.release = release;
+		this.developer= developer;
 	}
 
+	public Developer getDeveloper() {
+		return developer;
+	}
+
+	public void setDeveloper(Developer developer) {
+		this.developer = developer;
+	}
 
 	public String getName() {
 		return name;
@@ -26,13 +35,13 @@ public class Game {
 	}
 
 
-	public Date getBirth() {
-		return birth;
+	public Date getRelease() {
+		return release;
 	}
 
 
-	public void setBirth(Date birth) {
-		this.birth = birth;
+	public void setRelease(Date release) {
+		this.release = release;
 	}
 
 
