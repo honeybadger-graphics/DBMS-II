@@ -83,12 +83,14 @@ public class Manager {
 	}
 	
 	public Game getGameByName(String name){
+		Game nameofdeveloper = null;
 		try {
 		PreparedStatement prstmt = this.conn.prepareStatement(getGameByNameSQL);
 		prstmt.setString(1, name);
 		ResultSet rs = prstmt.executeQuery();
 		rs.next();
-		return new Game(rs.getInt(1),rs.getString(2),rs.getDate(3),rs.getDeveloper(4));
+		
+		return new Game(rs.getInt(1),rs.getString(2),rs.getDate(3),nameofdeveloper.getDeveloper());
 		
 		}catch(SQLException e) {	}
 		
@@ -102,7 +104,7 @@ public class Manager {
 		prstmt.executeUpdate();
 	}
 	
-	public ArrayList<ArrayList<String>> selectGameAndCars() throws SQLException {
+	public ArrayList<ArrayList<String>> selectGameAndDevelopers() throws SQLException {
 		PreparedStatement prstmt = this.conn.prepareStatement(SELECT_ALL_TABLES);
 		ResultSet rs = prstmt.executeQuery();
 		ResultSetMetaData rsmd = rs.getMetaData();
@@ -132,7 +134,7 @@ public class Manager {
 	public ArrayList<String> getTableNames() throws SQLException{
 		ArrayList<String> tableNames= new ArrayList<String>();
 		DatabaseMetaData dmd = this.conn.getMetaData();
-		ResultSet rs = dmd.getTables(null, "H20_GPNWZT", "%", null);
+		ResultSet rs = dmd.getTables(null, "H21_YG5YAO", "%", null);
 		while(rs.next()) {
 			tableNames.add(rs.getString(3));
 		}
