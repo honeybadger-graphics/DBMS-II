@@ -3,7 +3,7 @@ package models;
 import java.sql.Date;
 
 public class Developer {
-	private final int id;
+	private int id;
 	private Date prodstart_date;
 	private String name;
 	private int employees ;
@@ -42,6 +42,10 @@ public class Developer {
 
 	public void setEmployees(int numberofemployees) {
 		this.employees = numberofemployees;
+	}
+
+	public void setId(int id) {
+		this.id=id;
 	}
 
 
