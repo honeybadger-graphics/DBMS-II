@@ -4,14 +4,14 @@ import java.sql.Date;
 
 public class Developer {
 	private int id;
-	private Date prodstart_date;
+	private Date start_date;
 	private String name;
 	private int employees ;
 	
-	public Developer(int id, Date prodstart_date, String name, int numberofemployees) {
+	public Developer(int id, Date start_date, String name, int numberofemployees) {
 		super();
 		this.id = id;
-		this.prodstart_date = prodstart_date;
+		this.start_date = start_date;
 		this.name = name;
 		this.employees = numberofemployees;
 	}
@@ -20,12 +20,12 @@ public class Developer {
 		return id;
 	}
 
-	public Date getProdStart_date() {
-		return prodstart_date;
+	public Date getStart_date() {
+		return start_date;
 	}
 
-	public void setProdStart_date(Date prodstart_date) {
-		this.prodstart_date = prodstart_date;
+	public void setStart_date(Date prodstart_date) {
+		this.start_date = prodstart_date;
 	}
 
 	public String getName() {
