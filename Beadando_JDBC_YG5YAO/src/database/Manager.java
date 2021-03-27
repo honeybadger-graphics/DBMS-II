@@ -1,8 +1,15 @@
 package database;
 
+
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.InputStreamReader;
+import java.io.PrintWriter;
+import java.nio.charset.Charset;
 import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
+import java.sql.Date;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -10,6 +17,7 @@ import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.Scanner;
 
 import models.Game;
 import models.Developer;
@@ -25,13 +33,14 @@ public class Manager {
 	private static final String selectMaxGameIdSQL="select max(id) from game";
 	private static final String insertDeveloperSQL="insert into developer values(?,?,?,?)";
 	private static final String selectMaxDeveloperIdSQL="select max(id) from developer";
-	private static final String updateGenreWhereGamenameSQL="update game set genre=? where name = ?";
-	private static final String getGamesByDeveloperSQL="select * from game where developer = ?";
+	private static final String updateGenreWhereGamenameSQL="update game set genre=? where name = ?"; //not implemented
+	private static final String updateEmployeesWhereDevnameSQL="update developer set employees=? where name = ?"; //not implemented
+	private static final String getGamesByDeveloperSQL="select g.id,g.name,g.genre,g.release,g.developerID from game g inner join developer d on d.id=g.developerID where d.name=?";
 	private static final String getGameOrdeByNameSQL="select name, genre from game order by name asc";
-	private static final String getDeveloperOrdeByEmployeesSQL="select name, employees from developer order by empleyees desc";
-	private static final String getDeveloperByGameSQL="select d.id,d.start_date,d.name,d.emloyees from game g inner join developer d on g.id=d.id where g.id=?";
-	private static final String DELETE_GAME_SQL="delete from game where name = ?";
-	private static final String DELETE_DEVELOPER_SQL="delete from developer where name = ?";
+	private static final String getDeveloperOrdeByEmployeesSQL="select name, employees from developer order by employees desc";
+	private static final String getDeveloperByGameSQL="select d.id, d.start_date, d.name, d.employees from developer d inner join game g on d.id=g.developerID where g.name=?";
+	private static final String DELETE_GAME_SQL="DELETE FROM Game WHERE name = ?";
+	private static final String DELETE_DEVELOPER_SQL="DELETE FROM Developer WHERE name = ?";
 	private static final String SELECT_ALL_TABLES="Select * from game g left outer join developer d on (g.developerID=d.id)";
 	
 	private static final String CALLABLE_TEST="{? = call fibf(?)}";
@@ -83,10 +92,10 @@ public class Manager {
 	public void insertDeveloper(Developer developer) throws Exception {
 		PreparedStatement prstmt = this.conn.prepareStatement(insertDeveloperSQL);
 		developer.setId(getMaxDevId()+1);
-		prstmt.setInt(1, developer.getId());
-		prstmt.setString(3, developer.getName());
-		prstmt.setDate(2, developer.getStart_date());
-		prstmt.setInt(4, developer.getEmployees());
+		prstmt.setInt(1, Developer.getId());
+		prstmt.setString(3, Developer.getName());
+		prstmt.setDate(2, Developer.getStart_date());
+		prstmt.setInt(4, Developer.getEmployees());
 		
 		if(prstmt.execute()) new Exception("Not successful");
 	}
@@ -110,12 +119,12 @@ public class Manager {
 		return returnValue;
 	}
 	//gets games of developer
-	public ArrayList<Game> getGamesByDeveloper(Developer developer) throws SQLException{
+	public ArrayList<Game> getGamesByDeveloper(String name) throws SQLException{
 		ArrayList<Game> result = new ArrayList<Game>();
 		try {
 		PreparedStatement prstmt = this.conn.prepareStatement(getGamesByDeveloperSQL);
 		
-		prstmt.setInt(1, developer.getId());
+		prstmt.setString(1, name);
 		
 		ResultSet rs = prstmt.executeQuery();
 		
@@ -128,30 +137,31 @@ public class Manager {
 		return result;
 	}
 	// get a developer of a game from db
-	public Developer getDeveloperByGame(int gameID){
+	public Developer getDeveloperByGame(String name){
 		try {
-		PreparedStatement prstmt = this.conn.prepareStatement(getDeveloperByGameSQL);
-		prstmt.setInt(1, gameID);
-		ResultSet rs = prstmt.executeQuery();
-		rs.next();
+			PreparedStatement prstmt = this.conn.prepareStatement(getDeveloperByGameSQL);
+			prstmt.setString(1, name);
+			ResultSet rs = prstmt.executeQuery();
+			rs.next();
+			return new Developer(rs.getInt(1),rs.getDate(2),rs.getString(3),rs.getInt(4));
+			
+			}catch(SQLException e) {	}
+			
+			return null;
 		
-		return new Developer(rs.getInt(1),rs.getDate(3),rs.getString(2),rs.getInt(4));
 		
-		}catch(SQLException e) {	}
-		
-		return null;
 	}
 	//orders games by name and writes genre
 	public void getGameOrderByName(){
 		try {
-		PreparedStatement prstmt = this.conn.prepareStatement(getGameOrdeByNameSQL);
-		ResultSet rs = prstmt.executeQuery();
-		System.out.print("  Name: 			Genre: ");
-		System.out.print("-------------------------------------------");
+			PreparedStatement prstmt = this.conn.prepareStatement(getGameOrdeByNameSQL);
+			ResultSet rs = prstmt.executeQuery();
+		System.out.println("  Name: 			Genre: ");
+		System.out.println("-------------------------------------------");
 		while(rs.next()) {
-			String name = rs.getString(2);
-			String genre = rs.getString(3);
-			System.out.print(name+"  		 "+genre);
+			String name = rs.getString(1);
+			String genre = rs.getString(2);
+			System.out.println(name+"  		 "+genre);
 		}
 		
 		}catch(SQLException e) {	}
@@ -162,30 +172,36 @@ public class Manager {
 		try {
 		PreparedStatement prstmt = this.conn.prepareStatement(getDeveloperOrdeByEmployeesSQL);
 		ResultSet rs = prstmt.executeQuery();
-		System.out.print("  Name: 			Num. of Emply:: ");
-		System.out.print("-------------------------------------------");
+		System.out.println("  Name: 			Num. of Emply: ");
+		System.out.println("-------------------------------------------");
 		while(rs.next()) {
-			String name = rs.getString(3);
-			int employees  = rs.getInt(4);
-			System.out.print(name+"  		 "+employees);
+			String name = rs.getString(1);
+			int employees  = rs.getInt(2);
+			System.out.println(name+"  		 "+employees);
 		}
 		
 		}catch(SQLException e) {	}
 		
 	}
 	//deletes a game based on its name
-	public void deleteGameByName(String input) throws SQLException {
-		PreparedStatement prstmt = this.conn.prepareStatement(DELETE_GAME_SQL);
-		String name = input;
-		prstmt.setString(2, name);
-		prstmt.executeUpdate();
+	public void deleteGameByName(String input) {
+		 try {  
+				PreparedStatement st = this.conn.prepareStatement(DELETE_GAME_SQL);
+		        st.setString(1,input);
+		        st.executeUpdate(); 
+		    } catch(Exception e) {
+		        System.out.println(e);
+		    }
 	}
 	//deletes a developer based on its name
-	public void deleteDeveloperByName(String input) throws SQLException {
-		PreparedStatement prstmt = this.conn.prepareStatement(DELETE_DEVELOPER_SQL);
-		String name = input;
-		prstmt.setString(3, name);
-		prstmt.executeUpdate();
+	public void deleteDeveloperByName(String input) {
+		 try {  
+		PreparedStatement st = this.conn.prepareStatement(DELETE_DEVELOPER_SQL);
+        st.setString(1,input);
+        st.executeUpdate(); 
+    } catch(Exception e) {
+        System.out.println(e);
+    }
 	}
 	//selects all tables
 	public ArrayList<ArrayList<String>> selectGameAndDevelopers() throws SQLException {
@@ -218,7 +234,12 @@ public class Manager {
 	public ArrayList<String> getTableNames() throws SQLException{
 		ArrayList<String> tableNames= new ArrayList<String>();
 		DatabaseMetaData dmd = this.conn.getMetaData();
-		ResultSet rs = dmd.getTables(null, "H21_YG5YAO", "%", null); //change the H21_YG5YAO to input from user
+		Scanner inputs = new Scanner(new InputStreamReader(
+		          System.in, Charset.forName("UTF-8")));
+		System.out.println("  Name of the Workspace: ");
+		String input = inputs.nextLine();
+		ResultSet rs = dmd.getTables(null, input, "%", null);
+		inputs.close();
 		while(rs.next()) {
 			tableNames.add(rs.getString(3));
 		}
@@ -304,12 +325,119 @@ public class Manager {
         
         
     }  
-    }  
+    }
+	public void writeList(ArrayList<Game> games) {
+		for(Game game: games){
+            System.out.println(game);
+        }		
+	}  
+	public void writeArrayList(ArrayList<String> result) {
+		for(String tablename: result){
+            System.out.println(tablename);
+        }		
+	}  
+	public void writeArryArrayList(ArrayList<ArrayList<String>> result) {
+		for(ArrayList<String> game: result){
+            System.out.println(game);
+        }
+	}
+	public void WriteIntoFile() {
+		System.out.println("Writing into out.txt");  
+		final String gameSQL="select * from game";
+		final String developerSQL="select * from developer";
+		try {  
+	        PrintWriter outputStream = new PrintWriter
+	               (new FileOutputStream(new File("out.txt"), true ));   
+	        outputStream.write("Game table:");  
+	        outputStream.write("\n");  
+	        outputStream.write("ID \t NAME \t GENRE \t RELEASE \t DEVELOPERID");  
+	        outputStream.write("\n");  
+	        outputStream.write("--------------------------------------------------");  
+	        outputStream.write("\n");  
+	        PreparedStatement s = this.conn.prepareStatement(gameSQL);  
+	        s.executeQuery();  
+	        ResultSet rs = s.getResultSet();  
+	        while (rs.next()) {  
+	              
+	            int id = rs.getInt("ID");  
+	           String name = rs.getString("NAME");  
+	           String genre = rs.getString("GENRE");
+	            Date release = rs.getDate("RELEASE");  
+	            int developer = rs.getInt("DEVELOPERID");  
+	          
+	                                  
+	            outputStream.write(id+ "\t" + name + "\t" +genre+"\t"
+	               +release + "\t"+ developer+"\n");  
+	        
+	        }  
+	        rs.close();
+	        outputStream.close();  
+	    } catch (Exception ex) {  
+	        System.err.println(ex.getMessage());  
+	    }
+		try {  
+	        PrintWriter outputStream = new PrintWriter
+	               (new FileOutputStream(new File("out.txt"), true ));   
+		outputStream.write("\n Developer table:");  
+        outputStream.write("\n");  
+        outputStream.write("ID \t CREATION DATE \t NAME \t NUMBER OF EMPLOYEES");  
+        outputStream.write("\n");  
+        outputStream.write("--------------------------------------------------");  
+        outputStream.write("\n");  
+        PreparedStatement s2 = this.conn.prepareStatement(developerSQL);  
+        s2.executeQuery();  
+        ResultSet rs2 = s2.getResultSet();  
+        while (rs2.next()) {  
+              
+            int id = rs2.getInt("ID");  
+           Date crdate  = rs2.getDate("START_DATE");  
+           String name = rs2.getString("NAME");
+            int employees = rs2.getInt("EMPLOYEES");  
+          
+                                  
+            outputStream.write(id+ "\t" + crdate + "\t" +name+"\t"
+               +employees+ "\n");
+        }  
+        rs2.close();
+        outputStream.close();  
+    } catch (Exception ex) {  
+        System.err.println(ex.getMessage());  
+    }
 
 		
-	
-
-
-	
+	}
+	 public void Employees() {   
+	        Scanner sc = new Scanner(System.in);  
+	        Statement s = null;  
+	        ResultSet rs = null;  
+	  
+	        System.out.println("Number of employees: ");  
+	        int employ=sc.nextInt();  
+	        final String sqlp = "select employees from Developer where employees <= '"+employ+"'";   
+	            try {  
+	                s = this.conn.createStatement(ResultSet.TYPE_FORWARD_ONLY,  
+	                        ResultSet.CONCUR_UPDATABLE);  
+	                rs =s.executeQuery(sqlp);  
+	                int countemploy=0;  
+	                while (rs.next()) {  
+	                    int employeesbefor = rs.getInt("employees");  
+	                    countemploy++;  
+	                    rs.updateInt("employees", (employeesbefor + 10));  
+	                    rs.updateRow();  
+	                        int employeesafter = rs.getInt("employees");  
+	                          
+	                          
+	                        System.out.println(countemploy +" Developers less than "+employ+" employees.");  
+	                        System.out.println(  employeesafter );  
+	                      
+	                    }  
+	                    rs.close();  
+	                      
+	                  
+	            } catch (Exception ex) {  
+	                System.err.println(ex.getMessage());  
+	            }  sc.close();
+	        }  
+	    
 }
 	

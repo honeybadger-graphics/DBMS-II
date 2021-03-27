@@ -18,6 +18,10 @@ public class Game {
 		this.release = release;
 		this.developerID= developerID;
 	}
+	public String toString() 
+	 {
+		return name+" \t "+genre+" \t "+release; 
+	 }
 
 	public int getDeveloperID() {
 		return developerID;

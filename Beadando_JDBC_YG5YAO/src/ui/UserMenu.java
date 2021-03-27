@@ -1,10 +1,16 @@
 package ui;
 
+/*Menus not working correctly or not implemented yet: 5,6 */
 import java.io.InputStreamReader;
 import java.nio.charset.Charset;
+import java.sql.Date;
+import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Scanner;
 
 import database.Manager;
+import models.Developer;
+import models.Game;
 
 public class UserMenu {
 	public static void main(String[] args) throws Exception {
@@ -30,8 +36,8 @@ String pw = enterPassword();
     break;
 case "N":
 case "n": 
-	String userManually = null; //YOU MAY CHANGE HERE FOR THE USERNAME format is: "username"
-	String pwManually = null;  //YOU MAY CHANGE HERE FOR PASSWORD format is: "password"
+	String userManually = "H21_YG5YAO"; //YOU MAY CHANGE HERE FOR THE USERNAME format is: "username"
+	String pwManually = "H21_YG5YAO";  //YOU MAY CHANGE HERE FOR PASSWORD format is: "password"
 	if(userManually != null && pwManually != null) 
 	{
         Manager currentManager2 = new Manager(userManually,pwManually);
@@ -44,11 +50,12 @@ case "n":
 	break;}
 }}
 private static void Commandlist() {
-	String[] commands = {"Delete tables", "Create tables"
-	        ,"Filling tables with data","Change style"  
-	        ,"Change school name", "Delete data", "Data from user", "Get table datas", "Hip-hop teachers"  
-	        ,"Capacity decrease","Select capacity","Average capacity","Change date"  
-	        ,"Select Teacher name"}; // change names to represent its commands
+	String[] commands = {"Create tables",
+	        "Filling tables with data","Add new developer"  
+	        ,"Add new game", "Change genre of a game", "Change number of employees of a developer", "Get games from a developer", "Developer of a game"  
+	        ,"Developers ordered by number of employees","Games ordered by name","Delete from game","Delete from developer","Selects everything from game and developer","All records from tabels into .TXT file ",
+	        "Write Metadata" , "Developers with less the X numberber of employees"
+	        }; // change names to represent its commands
 	for(int i=0; i < commands.length;i++) {System.out.println(i+1 + "." + commands[i]);  
 }
 }
@@ -58,6 +65,7 @@ public static String enterUserName()
           System.in, Charset.forName("UTF-8")));
 	 System.out.println("Enter username: ");
 		String user = keyboard.nextLine();
+		keyboard.close();
 		return user;
 		}
 //user input for pw
@@ -66,116 +74,155 @@ public static String enterPassword()
          System.in, Charset.forName("UTF-8")));
 	 System.out.println("Enter password: ");
 		String pw = keyboard.nextLine();
+		keyboard.close();
 		return pw;
 		}
 public static void Operations(Manager currentManager) {
 	/* this part will contain the switchers for the SQL operations and here they are going to run*/
-	int exiter; // user input for exiting the menu and disconnects from db if not calls itself to run other operations
 	Scanner operations = new Scanner(new InputStreamReader(
 	          System.in, Charset.forName("UTF-8")));
-			int menubuttons = operations.nextInt();
-	switch (menubuttons) {  
-	case 1:
-		currentManager.CreateTables();
-		exiter = operations.nextInt();
-		if(exiter == 1) 
-		{break;} 
-		else 
-		{
-			Operations(currentManager);}
-	case 2:
-		currentManager.InsertVaules();
-		exiter = operations.nextInt();
-		if(exiter == 1) 
-		{break;} 
-		else 
-		{Operations(currentManager);}
-	case 3:
-		// insert into developer
-		exiter = operations.nextInt();
-		if(exiter == 1) 
-		{break;} 
-		else 
-		{
-			Operations(currentManager);}
-	case 4:
-		// insert into game
-		exiter = operations.nextInt();
-		if(exiter == 1) 
-		{break;} 
-		else 
-		{Operations(currentManager);}
-	case 5:
-		// update gamegenre where name
-		exiter = operations.nextInt();
-		if(exiter == 1) 
-		{break;} 
-		else 
-		{Operations(currentManager);}
-	case 6:
-		// update deveempl where name
-		exiter = operations.nextInt();
-		if(exiter == 1) 
-		{break;} 
-		else 
-		{Operations(currentManager);}
-	case 7:
-		// getGamesByDeveloperSQL
-		exiter = operations.nextInt();
-		if(exiter == 1) 
-		{break;} 
-		else 
-		{Operations(currentManager);}
-	case 8:
-		// getGameOrdeByNameSQL
-		exiter = operations.nextInt();
-		if(exiter == 1) 
-		{break;} 
-		else 
-		{Operations(currentManager);}
-	case 9:
-		// getDeveloperOrdeByEmployeesSQL
-		exiter = operations.nextInt();
-		if(exiter == 1) 
-		{break;} 
-		else 
-		{Operations(currentManager);}
-	case 10:
-		// getDeveloperByGameSQL
-		exiter = operations.nextInt();
-		if(exiter == 1) 
-		{break;} 
-		else 
-		{Operations(currentManager);}
-	case 11:
-		// DELETE_GAME_SQL
-		exiter = operations.nextInt();
-		if(exiter == 1) 
-		{break;} 
-		else 
-		{Operations(currentManager);}
-	case 12:
-		// DELETE_DEVELOPER_SQL
-		exiter = operations.nextInt();
-		if(exiter == 1) 
-		{break;} 
-		else 
-		{Operations(currentManager);}
-	case 13:
-		// SELECT_ALL_TABLES
-		exiter = operations.nextInt();
-		if(exiter == 1) 
-		{break;} 
-		else 
-		{Operations(currentManager);}
-	case 14:
-		// File kiiaratas
-		exiter = operations.nextInt();
-		if(exiter == 1) 
-		{break;} 
-		else 
-		{Operations(currentManager);}
+	 System.out.println("Number of operations to run:");
+			int numberofoperations = operations.nextInt();
+			int[] menubuttons = new int[numberofoperations];
+			for(int i=0; i<menubuttons.length;i++) {System.out.println(i+1 +". operation is:");
+			menubuttons[i] = operations.nextInt();
+			}
+			for(int i=0; i<menubuttons.length;i++) {switch (menubuttons[i]) {  
+			case 1: //Works as intended
+				currentManager.CreateTables();
+				break; 
+			case 2: //works as intended
+				currentManager.InsertVaules();
+				break;
+			case 3: //works as intended
+				// insert into developer
+				Scanner inputs = new Scanner(new InputStreamReader(
+				          System.in, Charset.forName("UTF-8")));
+				System.out.println("Enter the name of the developer:");
+				String dname = inputs.nextLine();
+				System.out.println("Enter creation date of the developer: (Format: yyyy-mm-dd)" );
+				String ddate = inputs.nextLine();
+				System.out.println("Enter the number of employees of the developer:");
+				int demply = inputs.nextInt();
+				Date Fddate= Date.valueOf(ddate);
+				Developer newDeveloper = new Developer(0,Fddate,dname,demply);
+				try {
+					currentManager.insertDeveloper(newDeveloper);
+					currentManager.commit();
+				} catch (Exception e) {
+					System.err.println("Cannot insert new developer. "+ e.getMessage());  
+				}
+				break;
+			case 4: //works as intended
+				// insert into game
+				Scanner input = new Scanner(new InputStreamReader(
+				          System.in, Charset.forName("UTF-8")));
+				System.out.println("Enter the name of the game:");
+				String name = input.nextLine();
+				System.out.println("Enter the genre of the game:");
+				String genre = input.nextLine();
+				System.out.println("Enter release date of the game: (Format: yyyy-mm-dd)");
+				String date = input.nextLine();
+				System.out.println("Enter the ID fo the developer:");
+				int devid = input.nextInt();
+				Date Fdate= Date.valueOf(date);
+				Game newGame = new Game(0,name,genre,Fdate,devid);
+				try {
+					currentManager.insertGame(newGame);
+					currentManager.commit();
+				} catch (Exception e) {
+					System.err.println("Cannot insert new game. "+ e.getMessage());  
+				}
+				
+				break;
+			case 5:  //not implemented yet
+				// update gamegenre where name
+				break;
+			case 6: //not implemented yet
+				// update deveempl where name
+				break;
+			case 7: //works as intended
+				// getGamesByDeveloperSQL
+				Scanner input3 = new Scanner(new InputStreamReader(
+				          System.in, Charset.forName("UTF-8")));
+				System.out.println("Enter the name of the developer:");
+				String devname = input3.nextLine();
+				try {
+					ArrayList<Game> Games = currentManager.getGamesByDeveloper(devname);
+					System.out.println("Games by : "+devname);
+					System.out.println("--------------------------------------------------------------");
+					currentManager.writeList(Games);
+				} catch (SQLException e) {
+					System.err.println("Something went wrong!");
+					e.printStackTrace();
+				}
+				break;
+			case 8: //works as intended
+				// getDeveloperByGameSQL
+				Scanner input2 = new Scanner(new InputStreamReader(
+				          System.in, Charset.forName("UTF-8")));
+				System.out.println("Enter the name of the game:");
+				String gameID = input2.nextLine();
+				Developer gamedeveloper = currentManager.getDeveloperByGame(gameID);
+				System.out.println("CreationDate: \t Name: \t Num. of Emply:");
+				System.out.println("--------------------------------------------------------------");
+				System.out.println(gamedeveloper);
+				break;
+			case 9: //works as intended
+				// getDeveloperOrdeByEmployeesSQL
+				currentManager.getDeveloperOrderByEmply();
+				break;
+			case 10: //works as intended
+				// getGameOrdeByNameSQL
+				currentManager.getGameOrderByName();
+				break;
+			case 11: //works as intended
+				// DELETE_GAME_SQL
+				Scanner inputforgamedeletion = new Scanner(new InputStreamReader(
+				          System.in, Charset.forName("UTF-8")));
+				System.out.println("Enter the name of the game to de deleted:");
+				String nametobedeletedgame = inputforgamedeletion.nextLine();
+					currentManager.deleteGameByName(nametobedeletedgame);
+					inputforgamedeletion.close();
+				break;
+			case 12: //works as intended
+				// DELETE_DEVELOPER_SQL
+				Scanner inputfordevdeletion = new Scanner(new InputStreamReader(
+				          System.in, Charset.forName("UTF-8")));
+				System.out.println("Enter the name of the developer to de deleted:");
+				String nametobedeleteddev = inputfordevdeletion.nextLine();
+					currentManager.deleteDeveloperByName(nametobedeleteddev);
+					break;
+			case 13: //works as intended
+				// SELECT_ALL_TABLES
+				try {
+					ArrayList<ArrayList<String>> result = currentManager.selectGameAndDevelopers();
+					System.out.println("--------------------------------------------------------------");
+					currentManager.writeArryArrayList(result);
+				} catch (SQLException e) {
+					System.err.println("Something went wrong!");
+					e.printStackTrace();
+				}
+				break;
+			case 14: //works as intended
+				// File kiiaratas
+				currentManager.WriteIntoFile();
+				break;
+			case 15: // works as intended
+				try {
+					ArrayList<String> result=currentManager.getTableNames();
+					currentManager.writeArrayList(result);
+				} catch (SQLException e) {
+					e.printStackTrace();
+				}
+				break;
+			case 16: //works as intended
+				// kurzorkezelés with employees less than X
+				currentManager.Employees();
+				break;
+		}}
+	
 }
-}
+
 }
 
