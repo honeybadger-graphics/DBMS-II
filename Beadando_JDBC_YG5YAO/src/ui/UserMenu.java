@@ -1,6 +1,4 @@
 package ui;
-
-/*Menus not working correctly or not implemented yet: 5,6 */
 import java.io.InputStreamReader;
 import java.nio.charset.Charset;
 import java.sql.Date;
@@ -36,8 +34,8 @@ String pw = enterPassword();
     break;
 case "N":
 case "n": 
-	String userManually = "H21_YG5YAO"; //YOU MAY CHANGE HERE FOR THE USERNAME format is: "username"
-	String pwManually = "H21_YG5YAO";  //YOU MAY CHANGE HERE FOR PASSWORD format is: "password"
+	String userManually = null; //YOU MAY CHANGE HERE FOR THE USERNAME format is: "username"
+	String pwManually = null;  //YOU MAY CHANGE HERE FOR PASSWORD format is: "password"
 	if(userManually != null && pwManually != null) 
 	{
         Manager currentManager2 = new Manager(userManually,pwManually);
@@ -55,8 +53,8 @@ private static void Commandlist() {
 	        ,"Add new game", "Change genre of a game", "Change number of employees of a developer", "Get games from a developer", "Developer of a game"  
 	        ,"Developers ordered by number of employees","Games ordered by name","Delete from game","Delete from developer","Selects everything from game and developer","All records from tabels into .TXT file ",
 	        "Write Metadata" , "Developers with less the X numberber of employees"
-	        }; // change names to represent its commands
-	for(int i=0; i < commands.length;i++) {System.out.println(i+1 + "." + commands[i]);  
+	        };
+	for(int i=0; i < commands.length;i++) {System.out.println(i+1 + ". " + commands[i]);  
 }
 }
 //user input for username
@@ -65,7 +63,7 @@ public static String enterUserName()
           System.in, Charset.forName("UTF-8")));
 	 System.out.println("Enter username: ");
 		String user = keyboard.nextLine();
-		keyboard.close();
+		
 		return user;
 		}
 //user input for pw
@@ -74,7 +72,7 @@ public static String enterPassword()
          System.in, Charset.forName("UTF-8")));
 	 System.out.println("Enter password: ");
 		String pw = keyboard.nextLine();
-		keyboard.close();
+
 		return pw;
 		}
 public static void Operations(Manager currentManager) {
@@ -135,18 +133,32 @@ public static void Operations(Manager currentManager) {
 				}
 				
 				break;
-			case 5:  //not implemented yet
+			case 5:  //works as intended
 				// update gamegenre where name
+				Scanner input4 = new Scanner(new InputStreamReader(
+				          System.in, Charset.forName("UTF-8")));
+				System.out.println("Enter the name of the Game to be updated:");
+				String inputgamename = input4.nextLine();
+				System.out.println("Enter the new genre:");
+				String inputgamegenre = input4.nextLine();
+				currentManager.updateGameGenre(inputgamename, inputgamegenre);
+
 				break;
-			case 6: //not implemented yet
+			case 6: //works as intended
 				// update deveempl where name
+				Scanner input3 = new Scanner(new InputStreamReader(System.in, Charset.forName("UTF-8")));
+				System.out.println("Enter the name of the Developer to be updated:");
+				String inputdevname = input3.nextLine();
+				System.out.println("Enter the new number of employees:");
+				int inputdevemployees = input3.nextInt();
+				currentManager.updateDeveloperEmployees(inputdevname,inputdevemployees);
 				break;
 			case 7: //works as intended
 				// getGamesByDeveloperSQL
-				Scanner input3 = new Scanner(new InputStreamReader(
+				Scanner input6 = new Scanner(new InputStreamReader(
 				          System.in, Charset.forName("UTF-8")));
 				System.out.println("Enter the name of the developer:");
-				String devname = input3.nextLine();
+				String devname = input6.nextLine();
 				try {
 					ArrayList<Game> Games = currentManager.getGamesByDeveloper(devname);
 					System.out.println("Games by : "+devname);
@@ -183,7 +195,6 @@ public static void Operations(Manager currentManager) {
 				System.out.println("Enter the name of the game to de deleted:");
 				String nametobedeletedgame = inputforgamedeletion.nextLine();
 					currentManager.deleteGameByName(nametobedeletedgame);
-					inputforgamedeletion.close();
 				break;
 			case 12: //works as intended
 				// DELETE_DEVELOPER_SQL

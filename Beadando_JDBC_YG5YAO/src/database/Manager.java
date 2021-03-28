@@ -33,8 +33,8 @@ public class Manager {
 	private static final String selectMaxGameIdSQL="select max(id) from game";
 	private static final String insertDeveloperSQL="insert into developer values(?,?,?,?)";
 	private static final String selectMaxDeveloperIdSQL="select max(id) from developer";
-	private static final String updateGenreWhereGamenameSQL="update game set genre=? where name = ?"; //not implemented
-	private static final String updateEmployeesWhereDevnameSQL="update developer set employees=? where name = ?"; //not implemented
+	private static final String updateGenreWhereGamenameSQL="update game set genre=? where name = ?";
+	private static final String updateEmployeesWhereDevnameSQL="update developer set employees=? where name = ?";
 	private static final String getGamesByDeveloperSQL="select g.id,g.name,g.genre,g.release,g.developerID from game g inner join developer d on d.id=g.developerID where d.name=?";
 	private static final String getGameOrdeByNameSQL="select name, genre from game order by name asc";
 	private static final String getDeveloperOrdeByEmployeesSQL="select name, employees from developer order by employees desc";
@@ -117,6 +117,36 @@ public class Manager {
 		returnValue = rs.getInt(1);
 		}catch(SQLException e) {}
 		return returnValue;
+	}
+	public void updateGameGenre(String inputname, String inputgenre) 
+	{
+		
+		try {  
+	        PreparedStatement prstmt1 = this.conn.prepareStatement(updateGenreWhereGamenameSQL); 
+	    	prstmt1.setString(1, inputgenre);
+	    	prstmt1.setString(2, inputname);
+	        prstmt1.executeUpdate();   
+	        System.out.println("Game updated!\n");  
+	        
+	    } catch (Exception ex) {  
+	        System.err.println("Game cannot be updated!"+ ex.getMessage());  
+	    }
+		
+	}
+	public void updateDeveloperEmployees(String inputname, int inputemployees) 
+	{
+		try {  
+	        PreparedStatement prstmt1 = this.conn.prepareStatement(updateEmployeesWhereDevnameSQL); 
+	    	prstmt1.setInt(1, inputemployees);
+	    	prstmt1.setString(2, inputname);
+	        prstmt1.executeUpdate();  
+	        System.out.println("Developer updated!\n");  
+	        
+	    } catch (Exception ex) {  
+	        System.err.println("Developer cannot be updated!"+ ex.getMessage());  
+	    }
+		
+		
 	}
 	//gets games of developer
 	public ArrayList<Game> getGamesByDeveloper(String name) throws SQLException{
@@ -239,7 +269,6 @@ public class Manager {
 		System.out.println("  Name of the Workspace: ");
 		String input = inputs.nextLine();
 		ResultSet rs = dmd.getTables(null, input, "%", null);
-		inputs.close();
 		while(rs.next()) {
 			tableNames.add(rs.getString(3));
 		}
