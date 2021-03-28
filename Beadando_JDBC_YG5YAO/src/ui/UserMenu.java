@@ -52,7 +52,7 @@ private static void Commandlist() {
 	        "Filling tables with data","Add new developer"  
 	        ,"Add new game", "Change genre of a game", "Change number of employees of a developer", "Get games from a developer", "Developer of a game"  
 	        ,"Developers ordered by number of employees","Games ordered by name","Delete from game","Delete from developer","Selects everything from game and developer","All records from tabels into .TXT file ",
-	        "Write Metadata" , "Developers with less the X numberber of employees"
+	        "Write Metadata" , "Developers with less the X number of employees"
 	        };
 	for(int i=0; i < commands.length;i++) {System.out.println(i+1 + ". " + commands[i]);  
 }
