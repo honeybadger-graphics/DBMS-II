@@ -192,7 +192,7 @@ public static void Operations(Manager currentManager) {
 				// DELETE_GAME_SQL
 				Scanner inputforgamedeletion = new Scanner(new InputStreamReader(
 				          System.in, Charset.forName("UTF-8")));
-				System.out.println("Enter the name of the game to de deleted:");
+				System.out.println("Enter the name of the game to be deleted:");
 				String nametobedeletedgame = inputforgamedeletion.nextLine();
 					currentManager.deleteGameByName(nametobedeletedgame);
 				break;
@@ -200,7 +200,7 @@ public static void Operations(Manager currentManager) {
 				// DELETE_DEVELOPER_SQL
 				Scanner inputfordevdeletion = new Scanner(new InputStreamReader(
 				          System.in, Charset.forName("UTF-8")));
-				System.out.println("Enter the name of the developer to de deleted:");
+				System.out.println("Enter the name of the developer to be deleted:");
 				String nametobedeleteddev = inputfordevdeletion.nextLine();
 					currentManager.deleteDeveloperByName(nametobedeleteddev);
 					break;
