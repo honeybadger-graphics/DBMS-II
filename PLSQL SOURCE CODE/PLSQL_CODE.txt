@@ -1,0 +1,329 @@
+//GAME TABLE
+create table Game (
+	id number(2) primary key, 
+	name varchar(25) not null, 
+	genre varchar(20), 
+	release date not null, 
+	developerID number(3) not null, 
+	foreign key (developerID) references Developer (id)
+	);
+//DEVELOPER TABLE
+create table Developer (
+	id number(3) primary key, 
+	start_date date not null, 
+	name varchar(20) not null, 
+	employees number(6) not null
+	);
+//DEV INSERT
+	insert into Developer values(1, to_date('2012.08.14','yyyy.mm.dd.'), 'Respawn Ent', 516); 
+        insert into Developer values(2, to_date('2008.03.29','yyyy.mm.dd.'), 'Blizzard Ent', 3265);
+        insert into Developer values(3, to_date('2001.12.01','yyyy.mm.dd.'), 'Rockstar Games', 4011);
+        insert into Developer values(4, to_date('2000.01.14','yyyy.mm.dd.'), 'Team17', 1016);
+        insert into Developer values(5, to_date('2009.09.24','yyyy.mm.dd.'), 'Overkill Software', 442);
+	insert into Developer values(6, to_date('2003.01.09','yyyy.mm.dd.'), 'Obsidian Ent', 322);
+	insert into Developer values(7, to_date('2001.05.23','yyyy.mm.dd.'), 'Unknown Wolrds', 245);
+	insert into Developer values(8, to_date('1987.05.15','yyyy.mm.dd.'), 'Ubisoft', 2018);
+//GAME INSERT
+	insert into Game values (1,'Titanfall 1','FPS', to_date('2014.03.11','yyyy.mm.dd.'),1);  
+        insert into Game values (2,'Titanfall 2','FPS', to_date('2016.10.28','yyyy.mm.dd.'),1);  
+        insert into Game values (3,'Worms WMD','Turn-based tactics', to_date('2016.08.23','yyyy.mm.dd.'),4);  
+        insert into Game values (4,'Red Dead Redemption 2','Action-adventure', to_date('2018.10.26','yyyy.mm.dd.'),3);  
+        insert into Game values (5,'Payday The Heist','Arcade FPS', to_date('2011.10.18','yyyy.mm.dd.'),5);
+        insert into Game values (6,'Payday 2','Arcade FPS',to_date('2013.08.13','yyyy.mm.dd.'),5);
+        insert into Game values (7,'Overwatch','Competitive FPS',to_date('2016.05.24','yyyy.mm.dd.'),2);
+	insert into Game values (8,'Apex Legends','Battle Royal',to_date('2019.02.04','yyyy.mm.dd.'),1);
+	insert into Game values (9,'Subnautica','Underwater Adv',to_date('2018.01.23','yyyy.mm.dd.'),7);
+	insert into Game values (10,'For Honor',' Fighting',to_date('2016.09.15','yyyy.mm.dd.'),8);
+//PLACEHOLDER INSERT
+declare
+n pls_integer;
+BEGIN  
+n := dbms_random.value(1,100);
+FOR loop_counter IN 11..20 LOOP  
+INSERT INTO Game (ID, Name ,Genre, Release, Developerid) 
+VALUES (loop_counter, 'Placeholder Game', 'Genre' ,to_date('2021.01.01.','yyyy.mm.dd.') ,'99'); 
+END LOOP; 
+COMMIT; 
+END;
+
+//NEW DEVELOPER
+create or replace procedure NewDev(ID number, START_DATE date, NAME char, EMPLOYEES number) is
+perror exception;
+begin
+   if EMPLOYEES = 0 then raise perror;
+   else
+   insert into DEVELOPER values(ID, START_DATE, NAME, EMPLOYEES);
+   end if;
+exception
+   when perror then
+      dbms_output.put_line('Nem létezhet fejlesztő 0 dolgozóval!');
+end;
+
+begin
+NewDev(11, '01/21/2012', 'Activision', 0);
+end;
+
+
+//NEW GAME
+create or replace procedure NewGame(ID number, NAME char, GENRE char, RELEASE date,  DEVELOPERID number) is
+perror exception;
+begin
+   if RELEASE <= '01/01/2010' then raise perror;
+   else
+   insert into Game values(ID, NAME, GENRE, RELEASE, DEVELOPERID);
+   end if;
+exception
+   when perror then
+      dbms_output.put_line('2010.01.01 és előtti játékokat nem áll módunkban számon tartani!');
+end;
+
+begin
+NewGame(21, 'Call of Duty: MW2', 'FPS', '10/10/2009', 11);
+end;
+
+//MODIFYEMPL
+create or replace procedure ModifyEmployees(NewNOfEmply number, DeveloperName char) is
+herror exception;
+   begin
+     if  NewNOfEmply <= 0 then raise herror;
+     else
+       update Developer set EMPLOYEES=NewNOfEmply where Name = DeveloperName;
+     end if;
+ 
+exception
+when herror then
+      dbms_output.put_line('Nem lehet 0 vagy kevesebb alkalmazottja egy fejlesztőnek.');
+end;
+
+select * from developer where name = 'Obsidian Ent';
+begin
+ModifyEmployees(452, 'Obsidian Ent');
+end;
+
+//MODIFYGENRE
+create or replace procedure ModifyGenre(NewGenre char, GameName char) is
+herror exception;
+   begin
+     if  NewGenre = 'FPS' then raise herror;
+     else
+       update Game set Genre=NewGenre where Name = GameName;
+     end if;
+ 
+exception
+when herror then
+      dbms_output.put_line('FPS műfaj nem elfogadott a továbbiakban mert megtévesztő.');
+end;
+select * from game where name='For Honor';
+begin
+ModifyGenre('Arcade Fighting', 'For Honor');
+end;
+
+//DELETE DEV
+create or replace procedure DevDel(DevName char) is
+begin
+   delete from Developer where Name=DevName;
+end;
+begin
+DevDel('Ubisoft');
+end;
+//DELETE GAME
+create or replace procedure GameDel(GameName char) is
+begin
+   delete from Game where Name=GameName;
+end;
+begin
+GameDel('For Honor');
+end;
+
+//FUNCTIONS
+create or replace function GameDevelopedBy (gamename in varchar2) return Developer.Name%type is devnames Developer.Name%type;
+begin
+select d.name into devnames from game g inner join developer d on g.developerid = d.id where g.name=gamename;
+return devnames;
+end;
+
+
+select GameDevelopedBy('Apex Legends') from Game;
+
+create or replace function NOGameDevelopedBy (Developer int) return int as DB int;
+begin
+select count(*) into DB from game where developerid=Developer;
+return DB;
+end;
+
+select NOGameDevelopedBy (5) from game;
+
+//LOOP
+ declare
+   c_id Game.ID%type;
+   c_name game.Name%type;
+   c_gen game.genre%type;
+   cursor c_games is select id, name, genre from Game;
+begin
+   open c_games;
+   loop
+      fetch c_games into c_id, c_name, c_gen;
+      exit when c_games%notfound;
+      dbms_output.put_line(c_id || ' | ' || c_name || ' | ' || c_gen);
+   end loop;
+   close c_games;
+end; 
+
+//TRIGGERS:
+//1
+CREATE OR REPLACE TRIGGER  "DELTRG" after delete on Developer for each row
+begin
+   insert into LogOfActivity values(sysdate, 'Remove', 'Developer' );
+end;
+//2
+CREATE OR REPLACE TRIGGER  "DELTRG2" after delete on Game for each row
+begin
+   insert into LogOfActivity values(sysdate, 'Remove', 'Game' );
+end;
+//3
+CREATE OR REPLACE TRIGGER  "LOGTRIG" after insert on Game for each row
+begin
+   insert into LogOfActivity values(sysdate, 'New Game', 'Game');
+end;
+//4
+CREATE OR REPLACE TRIGGER  "LOGTRIG2" after insert on Developer for each row
+begin
+   insert into LogOfActivity values(sysdate, 'New Developer', 'Developer');
+end;
+//5
+CREATE OR REPLACE TRIGGER  "UPDTRG" before update on Game for each row
+begin
+   insert into LogOfActivity values(sysdate, 'Update', 'Game');
+end;
+//6
+CREATE OR REPLACE TRIGGER  "UPDTRG2" before update on Developer for each row
+begin
+   insert into LogOfActivity values(sysdate, 'Update', 'Developer');
+end;
+
+//LOG TABLE
+create table LogOfActivity (
+DateOfAct date,
+Activity varchar (20),
+Tablename varchar (20) );
+
+select * from LogOfActivity;
+
+//PACKAGES
+
+//1
+create or replace package PackageModifyGD is
+   procedure ModifyGenre(NewGenre char, GameName char);
+   procedure ModifyEmployees(NewNOfEmply number, DeveloperName char);
+end PackageModifyGD;
+//BODY
+create or replace package body PackageModifyGD is
+procedure ModifyGenre(NewGenre char, GameName char) is
+herror exception;
+   begin
+     if  NewGenre = 'FPS' then raise herror;
+     else
+       update Game set Genre=NewGenre where Name = GameName;
+     end if;
+ 
+exception
+when herror then
+      dbms_output.put_line('FPS műfaj nem elfogadott a továbbiakban mert megtévesztő.');
+end;
+procedure ModifyEmployees(NewNOfEmply number, DeveloperName char) is
+herror exception;
+   begin
+     if  NewNOfEmply <= 0 then raise herror;
+     else
+       update Developer set EMPLOYEES=NewNOfEmply where Name = DeveloperName;
+     end if;
+ 
+exception
+when herror then
+      dbms_output.put_line('Nem lehet 0 vagy kevesebb alkalmazottja egy fejlesztőnek.');
+end;
+end PackageModifyGD;
+
+begin
+PackageModifyGD.ModifyGenre('Arcade Fighting', 'For Honor');
+PackageModifyGD.ModifyEmployees(452, 'Obsidian Ent');
+end;
+
+//2
+create or replace package PackageGD is
+   procedure NewDev(ID number, START_DATE date, NAME char, EMPLOYEES number);
+   procedure NewGame(ID number, NAME char, GENRE char, RELEASE date,  DEVELOPERID number);
+end PackageGD;
+//BODY
+create or replace package body PackageGD is
+procedure NewDev(ID number, START_DATE date, NAME char, EMPLOYEES number) is
+perror exception;
+begin
+   if EMPLOYEES = 0 then raise perror;
+   else
+   insert into DEVELOPER values(ID, START_DATE, NAME, EMPLOYEES);
+   end if;
+exception
+   when perror then
+      dbms_output.put_line('Nem létezhet fejlesztő 0 dolgozóval!');
+end;
+procedure NewGame(ID number, NAME char, GENRE char, RELEASE date,  DEVELOPERID number) is
+perror exception;
+begin
+   if RELEASE <= '01/01/2010' then raise perror;
+   else
+   insert into Game values(ID, NAME, GENRE, RELEASE, DEVELOPERID);
+   end if;
+exception
+   when perror then
+      dbms_output.put_line('2010.01.01 és előtti játékokat nem áll módunkban számon tartani!');
+end;
+end PackageGD;
+
+begin
+PackageGD.NewDev(11, '01/21/2012', 'Activision', 1248);
+PackageGD.NewGame(21, 'Call of Duty: MW2', 'FPS', '10/10/20010', 11);
+end;
+
+//3
+create or replace package PackageDelGD is
+   procedure DevDel(DevName char);
+   procedure GameDel(GameName char);
+end PackageDelGD;
+//BODY
+create or replace package body PackageDelGD is
+procedure DevDel(DevName char) is
+begin
+   delete from Developer where Name=DevName;
+end;
+procedure GameDel(GameName char) is
+begin
+   delete from Game where Name=GameName;
+end;
+end PackageDelGD;
+
+
+begin
+PackageDelGD.GameDel('For Honor');
+PackageDelGD.DevDel('Ubisoft');
+end;
+
+
+//DROPS
+drop trigger UPDTRG;
+drop trigger UPDTRG2;
+drop trigger LOGTRIG;
+drop trigger LOGTRIG2;
+drop trigger DELTRG;
+drop trigger DELTRG2;
+drop function GameDevelopedBy;
+drop function NOGameDevelopedBy;
+drop procedure DevDel;
+drop procedure GameDel;
+drop procedure ModifyGenre;
+drop procedure ModifyEmployees;
+drop procedure NewGame;
+drop procedure NewDev;
+drop table LogOfActivity;
+drop table DEVELOPER;
+drop table GAME;
